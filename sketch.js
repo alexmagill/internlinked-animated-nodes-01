@@ -5,11 +5,12 @@
 var balls=[];
 var NOB = 30; // NOB = Number of balls
 var link = document.documentElement.clientWidth  / 8; // base interlinking measurement on screen width
+var parentElement = 'background'; // The element ID that we'll attach the canvas to.
 
 function setup() {
   frameRate(30);
   var myCanvas = createCanvas(windowWidth,windowHeight);
-  myCanvas.parent('background'); // set this up on the background element
+  myCanvas.parent(parentElement); // set this up on the background element
   for(var i=0; i<NOB; i++)
   {
     balls.push(new Ball());
