@@ -4,7 +4,7 @@
 
 var balls=[];
 var NOB = 30; // NOB = Number of balls
-var link = document.documentElement.clientWidth  / 8; // base interlinking measurement on screen width
+var link = document.documentElement.clientWidth / 8; // base interlinking measurement on screen width
 var parentElement = 'background'; // The element ID that we'll attach the canvas to.
 
 function setup() {
@@ -37,17 +37,17 @@ function draw() {
 function Ball()
 {
   this.d = 10;
-  this.xPos= random(this.d,width-this.d/2);
-  this.yPos= random(this.d,height-this.d/2);
-  this.xPosf=random(0.2,4);
-  this.yPosf=random(0.2,2);
+  this.xPos = random(this.d,width-this.d/2);
+  this.yPos = random(this.d,height-this.d/2);
+  this.xPosf = random(0.2,4);
+  this.yPosf = random(0.2,2);
 
   var plusOrMinus = Math.random() < 0.5 ? -1 : 1;
 
   this.xPosPlus=random(this.d,width-this.d/2);
   this.yPosPlus=random(this.d,height-this.d/2);
 
-  this.disp=function()
+  this.disp = function() 
   {
     fill(249, 220, 92);
     noStroke();
@@ -69,9 +69,9 @@ function Ball()
       fill('rgba(249, 220, 92, 0.3)');
       ellipse(this.xPos,this.yPos,this.d*4,this.d*4);
     }
-  };
+  }
   
-  this.move=function()
+  this.move = function()
   {
     this.xPos += this.xPosf * plusOrMinus;
     this.yPos += this.yPosf * plusOrMinus;
@@ -85,7 +85,7 @@ function Ball()
     } else if (this.yPos < this.d/2) {
       this.yPos = height - this.d/2;
     }
-  };
+  }
 
   this.connect = function(other)
   {
@@ -98,7 +98,7 @@ function Ball()
     bezierVertex(this.xPosPlus, this.yPos, other.xPos, other.yPosPlus, other.xPos, other.yPos);
     endShape();
     }
-  };
+  }
   
   this.exconnect = function(other)
   {
@@ -111,9 +111,9 @@ function Ball()
     bezierVertex(this.xPosPlus, this.yPos, other.xPos, other.yPosPlus, other.xPos, other.yPos);
     endShape();
     }
-  };
+  }
 
-this.axconnect = function(other)
+  this.axconnect = function(other)
   {
     if(dist(this.xPos,this.yPos,other.xPos,other.yPos) < link)
     {
@@ -133,5 +133,5 @@ this.axconnect = function(other)
     stroke('rgba(249, 220, 92, .05)');
     line(this.xPos,this.yPos,other.xPos,other.yPos);
     }
-  };
+  }
 }
