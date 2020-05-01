@@ -6,6 +6,7 @@ var balls=[];
 var NOB = 30; // NOB = Number of balls
 var link = document.documentElement.clientWidth / 8; // base interlinking measurement on screen width
 var parentElement = 'background'; // The element ID that we'll attach the canvas to.
+var backgroundColor = '#201F2C'; // Set the background colour - we use this to re-draw each frame so that they don't over-draw eachother.
 
 function setup() {
   frameRate(30);
@@ -18,7 +19,7 @@ function setup() {
 }
 
 function draw() {
-  background('#201F2C');
+  background(backgroundColor);
   for(var i=0; i<NOB; i++)
   {
     for(var j=0; j<NOB; j++){
