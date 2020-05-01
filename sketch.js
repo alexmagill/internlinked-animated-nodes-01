@@ -42,9 +42,7 @@ function Ball()
   this.yPos = random(this.d,height-this.d/2);
   this.xPosf = random(0.2,4);
   this.yPosf = random(0.2,2);
-
   var plusOrMinus = Math.random() < 0.5 ? -1 : 1;
-
   this.xPosPlus=random(this.d,width-this.d/2);
   this.yPosPlus=random(this.d,height-this.d/2);
 
@@ -58,15 +56,18 @@ function Ball()
     ellipse(this.xPos,this.yPos,this.d*2,this.d*2);
     stroke('rgba(249, 220, 92, 0.3)');
     ellipse(this.xPos,this.yPos,this.d*4,this.d*4);
-    if (Math.abs(mouseX - this.xPos) < 45 && Math.abs(mouseY - this.yPos) < 45) {
+    if (Math.abs(mouseX - this.xPos) < 45 && Math.abs(mouseY - this.yPos) < 45) 
+    {
       fill('rgba(249, 220, 92, 0.1)');
       ellipse(this.xPos,this.yPos,this.d*4,this.d*4);
     }
-    if (Math.abs(mouseX - this.xPos) < 15 && Math.abs(mouseY - this.yPos) < 15) {
+    if (Math.abs(mouseX - this.xPos) < 15 && Math.abs(mouseY - this.yPos) < 15) 
+    {
       fill('rgba(249, 220, 92, 0.2)');
       ellipse(this.xPos,this.yPos,this.d*4,this.d*4);
     }
-    if (Math.abs(mouseX - this.xPos) < 5 && Math.abs(mouseY - this.yPos) < 5) {
+    if (Math.abs(mouseX - this.xPos) < 5 && Math.abs(mouseY - this.yPos) < 5) 
+    {
       fill('rgba(249, 220, 92, 0.3)');
       ellipse(this.xPos,this.yPos,this.d*4,this.d*4);
     }
@@ -90,49 +91,49 @@ function Ball()
 
   this.connect = function(other)
   {
-    if(dist(this.xPos,this.yPos,other.xPos,other.yPos) < link / 2)
+    if (dist(this.xPos,this.yPos,other.xPos,other.yPos) < link / 2)
     {
-    stroke('rgba(49, 133, 252, .2)');
-    noFill();
-    beginShape();
-    vertex(this.xPos, this.yPos);
-    bezierVertex(this.xPosPlus, this.yPos, other.xPos, other.yPosPlus, other.xPos, other.yPos);
-    endShape();
+      stroke('rgba(49, 133, 252, .2)');
+      noFill();
+      beginShape();
+      vertex(this.xPos, this.yPos);
+      bezierVertex(this.xPosPlus, this.yPos, other.xPos, other.yPosPlus, other.xPos, other.yPos);
+      endShape();
     }
   }
   
   this.exconnect = function(other)
   {
-    if(dist(this.xPos,this.yPos,other.xPos,other.yPos) < link / 1.5)
+    if (dist(this.xPos,this.yPos,other.xPos,other.yPos) < link / 1.5)
     {
-    stroke('rgba(49, 133, 252, .1)');
-    noFill();
-    beginShape();
-    vertex(this.xPos, this.yPos);
-    bezierVertex(this.xPosPlus, this.yPos, other.xPos, other.yPosPlus, other.xPos, other.yPos);
-    endShape();
+      stroke('rgba(49, 133, 252, .1)');
+      noFill();
+      beginShape();
+      vertex(this.xPos, this.yPos);
+      bezierVertex(this.xPosPlus, this.yPos, other.xPos, other.yPosPlus, other.xPos, other.yPos);
+      endShape();
     }
   }
 
   this.axconnect = function(other)
   {
-    if(dist(this.xPos,this.yPos,other.xPos,other.yPos) < link)
+    if (dist(this.xPos,this.yPos,other.xPos,other.yPos) < link)
     {
-    stroke('rgba(49, 133, 252, .025)');
-    noFill();
-    beginShape();
-    vertex(this.xPos, this.yPos);
-    bezierVertex(this.xPosPlus, this.yPos, other.xPos, other.yPosPlus, other.xPos, other.yPos);
-    endShape();
+      stroke('rgba(49, 133, 252, .025)');
+      noFill();
+      beginShape();
+      vertex(this.xPos, this.yPos);
+      bezierVertex(this.xPosPlus, this.yPos, other.xPos, other.yPosPlus, other.xPos, other.yPos);
+      endShape();
     }
   };
   
   this.reconnect = function(other)
   {
-    if(dist(this.xPos,this.yPos,other.xPos,other.yPos) < link * 1.5)
+    if (dist(this.xPos,this.yPos,other.xPos,other.yPos) < link * 1.5)
     {
-    stroke('rgba(249, 220, 92, .05)');
-    line(this.xPos,this.yPos,other.xPos,other.yPos);
+      stroke('rgba(249, 220, 92, .05)');
+      line(this.xPos,this.yPos,other.xPos,other.yPos);
     }
   }
 }
