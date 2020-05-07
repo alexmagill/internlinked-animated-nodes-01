@@ -6,7 +6,23 @@ var balls=[];
 var NOB = 30; // NOB = Number of balls
 var link = document.documentElement.clientWidth / 8; // base interlinking measurement on screen width
 var parentElement = 'background'; // The element ID that we'll attach the canvas to.
+
+// Set the colour palette
 var backgroundColor = '#201F2C'; // Set the background colour - we use this to re-draw each frame so that they don't over-draw eachother.
+var ballColor = [249, 220, 92]; // Set the ball, and ball outlines (stroke) colour
+var linkLineColor = [249, 220, 92]; // Set the linear link colour
+var linkCurveColor = [49, 133, 252]; // Set the curve link colour
+
+// Quick functuon to convert base RGB colours to p5.js's rgba color model
+// Inputs are: 
+// rgbColor =  an RGB array
+// alphaValue = RGBA alpha value from 0 to 1
+function setAlpha(rgbColor, alphaValue) {
+  var rgbOutput = rgbColor.slice(); // Copy rgbColor array
+  alphaValue = Math.round(255 * alphaValue); // Convert to nearest integer 
+  rgbOutput.push(alphaValue); // Build the output array
+  return rgbOutput;
+} 
 
 function setup() {
   frameRate(30);
@@ -51,24 +67,24 @@ function Ball()
     fill(249, 220, 92);
     noStroke();
     ellipse(this.xPos,this.yPos,this.d,this.d);
-    stroke('rgba(249, 220, 92, 0.6)');
+    stroke(setAlpha(ballColor, 0.6));
     noFill();
     ellipse(this.xPos,this.yPos,this.d*2,this.d*2);
-    stroke('rgba(249, 220, 92, 0.3)');
+    stroke(setAlpha(ballColor, 0.3));
     ellipse(this.xPos,this.yPos,this.d*4,this.d*4);
     if (Math.abs(mouseX - this.xPos) < 45 && Math.abs(mouseY - this.yPos) < 45) 
     {
-      fill('rgba(249, 220, 92, 0.1)');
+      fill(setAlpha(ballColor, 0.1));
       ellipse(this.xPos,this.yPos,this.d*4,this.d*4);
     }
     if (Math.abs(mouseX - this.xPos) < 15 && Math.abs(mouseY - this.yPos) < 15) 
     {
-      fill('rgba(249, 220, 92, 0.2)');
+      fill(setAlpha(ballColor, 0.2));
       ellipse(this.xPos,this.yPos,this.d*4,this.d*4);
     }
     if (Math.abs(mouseX - this.xPos) < 5 && Math.abs(mouseY - this.yPos) < 5) 
     {
-      fill('rgba(249, 220, 92, 0.3)');
+      fill(setAlpha(ballColor, 0.3));
       ellipse(this.xPos,this.yPos,this.d*4,this.d*4);
     }
   }
@@ -93,7 +109,7 @@ function Ball()
   {
     if (dist(this.xPos,this.yPos,other.xPos,other.yPos) < link / 2)
     {
-      stroke('rgba(49, 133, 252, .2)');
+      stroke(setAlpha(linkCurveColor, 0.2));
       noFill();
       beginShape();
       vertex(this.xPos, this.yPos);
@@ -106,7 +122,7 @@ function Ball()
   {
     if (dist(this.xPos,this.yPos,other.xPos,other.yPos) < link / 1.5)
     {
-      stroke('rgba(49, 133, 252, .1)');
+      stroke(setAlpha(linkCurveColor, 0.1));
       noFill();
       beginShape();
       vertex(this.xPos, this.yPos);
@@ -119,7 +135,7 @@ function Ball()
   {
     if (dist(this.xPos,this.yPos,other.xPos,other.yPos) < link)
     {
-      stroke('rgba(49, 133, 252, .025)');
+      stroke(setAlpha(linkCurveColor, 0.025));
       noFill();
       beginShape();
       vertex(this.xPos, this.yPos);
@@ -132,7 +148,7 @@ function Ball()
   {
     if (dist(this.xPos,this.yPos,other.xPos,other.yPos) < link * 1.5)
     {
-      stroke('rgba(249, 220, 92, .05)');
+      stroke(setAlpha(linkLineColor, 0.05));
       line(this.xPos,this.yPos,other.xPos,other.yPos);
     }
   }
