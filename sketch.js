@@ -9,9 +9,9 @@ var parentElement = 'background'; // The element ID that we'll attach the canvas
 
 // Set the colour palette
 var backgroundColor = '#201F2C'; // Set the background colour - we use this to re-draw each frame so that they don't over-draw eachother.
-var ballColor = [249, 220, 92]; // Set the ball, and ball outlines (stroke) colour
-var linkLineColor = [249, 220, 92]; // Set the linear link colour
-var linkCurveColor = [49, 133, 252]; // Set the curve link colour
+var ballColor = [249, 220, 92]; // Set the ball, and ball outlines (stroke) colour RGB
+var linkLineColor = [249, 220, 92]; // Set the linear link colour RGB
+var linkCurveColor = [49, 133, 252]; // Set the curve link colour RGB
 
 // Quick functuon to convert base RGB colours to p5.js's rgba color model
 // Inputs are: 
