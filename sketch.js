@@ -51,8 +51,7 @@ function draw() {
   }
 }
 
-function Ball()
-{
+function Ball() {
   this.d = 10;
   this.xPos = random(this.d,width-this.d/2);
   this.yPos = random(this.d,height-this.d/2);
@@ -62,8 +61,7 @@ function Ball()
   this.xPosPlus=random(this.d,width-this.d/2);
   this.yPosPlus=random(this.d,height-this.d/2);
 
-  this.disp = function() 
-  {
+  this.disp = function() {
     fill(249, 220, 92);
     noStroke();
     ellipse(this.xPos,this.yPos,this.d,this.d);
@@ -87,10 +85,9 @@ function Ball()
       fill(setAlpha(ballColor, 0.3));
       ellipse(this.xPos,this.yPos,this.d*4,this.d*4);
     }
-  }
-  
-  this.move = function()
-  {
+  };
+
+  this.move = function() {
     this.xPos += this.xPosf * plusOrMinus;
     this.yPos += this.yPosf * plusOrMinus;
     if(this.xPos > width-this.d/2) {
@@ -103,10 +100,9 @@ function Ball()
     } else if (this.yPos < this.d/2) {
       this.yPos = height - this.d/2;
     }
-  }
+  };
 
-  this.connect = function(other)
-  {
+  this.connect = function(other) {
     if (dist(this.xPos,this.yPos,other.xPos,other.yPos) < link / 2)
     {
       stroke(setAlpha(linkCurveColor, 0.2));
@@ -116,10 +112,9 @@ function Ball()
       bezierVertex(this.xPosPlus, this.yPos, other.xPos, other.yPosPlus, other.xPos, other.yPos);
       endShape();
     }
-  }
-  
-  this.exconnect = function(other)
-  {
+  };
+
+  this.exconnect = function(other) {
     if (dist(this.xPos,this.yPos,other.xPos,other.yPos) < link / 1.5)
     {
       stroke(setAlpha(linkCurveColor, 0.1));
@@ -129,10 +124,9 @@ function Ball()
       bezierVertex(this.xPosPlus, this.yPos, other.xPos, other.yPosPlus, other.xPos, other.yPos);
       endShape();
     }
-  }
+  };
 
-  this.axconnect = function(other)
-  {
+  this.axconnect = function(other) {
     if (dist(this.xPos,this.yPos,other.xPos,other.yPos) < link)
     {
       stroke(setAlpha(linkCurveColor, 0.025));
@@ -143,13 +137,12 @@ function Ball()
       endShape();
     }
   };
-  
-  this.reconnect = function(other)
-  {
+
+  this.reconnect = function(other) {
     if (dist(this.xPos,this.yPos,other.xPos,other.yPos) < link * 1.5)
     {
       stroke(setAlpha(linkLineColor, 0.05));
       line(this.xPos,this.yPos,other.xPos,other.yPos);
     }
-  }
+  };
 }
