@@ -152,6 +152,40 @@ function resetSettingsToDefaults() {
   saveSettings();
 }
 
+function randomiseSettings() {
+  backgroundColor = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6,'0');
+
+  linkLineColor = [
+    random(100,255),
+    random(100,255),
+    random(100,255)
+  ];
+
+  linkCurveColor = [
+    random(50,255),
+    random(50,255),
+    random(50,255)
+  ];
+
+  ballStyle.fill = [
+    random(150,255),
+    random(150,255),
+    random(150,255)
+  ];
+
+  ballStyle.ring1 = ballStyle.fill.slice();
+  ballStyle.ring2 = ballStyle.fill.slice();
+
+  ballStyle.size = random(6,20);
+  ballStyle.ring1Scale = random(1.5,3);
+  ballStyle.ring2Scale = random(3,7);
+  ballStyle.ring1Alpha = random(0.2,0.8);
+  ballStyle.ring2Alpha = random(0.1,0.5);
+  ballStyle.hoverScale = random(3,8);
+
+  refreshUIFromState();
+}
+
 /* ---------------------------
    UI helpers
 ---------------------------- */
@@ -321,6 +355,10 @@ function buildColourUI() {
   const resetBtn = createButton('Reset');
   resetBtn.parent(btnRow);
   resetBtn.mousePressed(resetSettingsToDefaults);
+  
+  const randomBtn = createButton('🎲');
+  randomBtn.parent(btnRow);
+  randomBtn.mousePressed(randomiseSettings);
 
   // Base fields
   const fields = [
