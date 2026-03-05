@@ -1,6 +1,9 @@
-// We set up a number of 'balls' (defined by 'NOB') which move around the screen.
-// When they are close enough to each other (defined by 'link') they connect.
-// There are two types of connection, straight and curvy.
+// Linked nodes (optimised)
+// Key optimisations:
+// - No per-call RGBA array allocations (replaces setAlpha with strokeRGBA/fillRGBA)
+// - Precomputed distance thresholds (thr) updated only on resize
+// - Tighter hover-glow logic (fewer state changes and fewer comparisons)
+// - pixelDensity(1) for better performance on high-DPI screens
 
 let balls = [];
 let NOB = 30; // Number of balls
@@ -36,6 +39,26 @@ let ballStyle = {
   hoverA3: 0.30, // within 5px
 };
 
+// Cached thresholds (squared distances)
+let thr = {
+  line2: 0,
+  near2: 0,
+  mid2: 0,
+  far2: 0,
+};
+
+function updateThresholds() {
+  const line = link * 1.5;
+  const near = link / 2;
+  const mid = link / 1.5;
+  const far = link;
+
+  thr.line2 = line * line;
+  thr.near2 = near * near;
+  thr.mid2 = mid * mid;
+  thr.far2 = far * far;
+}
+
 // UI tools
 let ui = {
   wrap: null,
@@ -47,15 +70,16 @@ let ui = {
 
 const SETTINGS_KEY = 'linked-nodes-settings-v1';
 
-// Quick function to convert base RGB colours to p5.js rgba colour model
-// Inputs are:
-// rgbColor = an RGB array
-// alphaValue = RGBA alpha value from 0 to 1
-function setAlpha(rgbColor, alphaValue) {
-  const rgbOutput = rgbColor.slice(); // copy array
-  const a = Math.round(255 * alphaValue);
-  rgbOutput.push(a);
-  return rgbOutput;
+/* ---------------------------
+   Colour helpers
+---------------------------- */
+
+function strokeRGBA(rgb, alpha01) {
+  stroke(rgb[0], rgb[1], rgb[2], 255 * alpha01);
+}
+
+function fillRGBA(rgb, alpha01) {
+  fill(rgb[0], rgb[1], rgb[2], 255 * alpha01);
 }
 
 function rgbArrayToHex(rgb) {
@@ -75,8 +99,7 @@ function rgbArrayToHex(rgb) {
 
 function hexToRgbArray(hex) {
   const clean = String(hex).replace('#', '').trim();
-  const full =
-    clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean;
+  const full = clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean;
 
   const r = parseInt(full.slice(0, 2), 16);
   const g = parseInt(full.slice(2, 4), 16);
@@ -105,7 +128,6 @@ function applySettingsSnapshot(s) {
   if (Array.isArray(s.linkCurveColor)) linkCurveColor = s.linkCurveColor;
 
   if (s.ballStyle && typeof s.ballStyle === 'object') {
-    // Merge so missing keys do not explode
     ballStyle = { ...ballStyle, ...s.ballStyle };
   }
 
@@ -155,35 +177,22 @@ function resetSettingsToDefaults() {
 }
 
 function randomiseSettings() {
-  backgroundColor = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6,'0');
+  backgroundColor =
+    '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
 
-  linkLineColor = [
-    random(100,255),
-    random(100,255),
-    random(100,255)
-  ];
+  linkLineColor = [random(100, 255), random(100, 255), random(100, 255)];
+  linkCurveColor = [random(50, 255), random(50, 255), random(50, 255)];
 
-  linkCurveColor = [
-    random(50,255),
-    random(50,255),
-    random(50,255)
-  ];
-
-  ballStyle.fill = [
-    random(150,255),
-    random(150,255),
-    random(150,255)
-  ];
-
+  ballStyle.fill = [random(150, 255), random(150, 255), random(150, 255)];
   ballStyle.ring1 = ballStyle.fill.slice();
   ballStyle.ring2 = ballStyle.fill.slice();
 
-  ballStyle.size = random(6,20);
-  ballStyle.ring1Scale = random(1.5,3);
-  ballStyle.ring2Scale = random(3,7);
-  ballStyle.ring1Alpha = random(0.2,0.8);
-  ballStyle.ring2Alpha = random(0.1,0.5);
-  ballStyle.hoverScale = random(3,8);
+  ballStyle.size = random(6, 20);
+  ballStyle.ring1Scale = random(1.5, 3);
+  ballStyle.ring2Scale = random(3, 7);
+  ballStyle.ring1Alpha = random(0.2, 0.8);
+  ballStyle.ring2Alpha = random(0.1, 0.5);
+  ballStyle.hoverScale = random(3, 8);
 
   refreshUIFromState();
 }
@@ -268,7 +277,6 @@ function refreshUIFromState() {
   if (ui.inputs.ring1) ui.inputs.ring1.value(rgbArrayToHex(ballStyle.ring1));
   if (ui.inputs.ring2) ui.inputs.ring2.value(rgbArrayToHex(ballStyle.ring2));
 
-  // Sliders (optional but nice)
   const setSlider = (key, newValue) => {
     const entry = ui.inputs[key];
     if (!entry || !entry.slider) return;
@@ -357,7 +365,7 @@ function buildColourUI() {
   const resetBtn = createButton('Reset');
   resetBtn.parent(btnRow);
   resetBtn.mousePressed(resetSettingsToDefaults);
-  
+
   const randomBtn = createButton('🎲');
   randomBtn.parent(btnRow);
   randomBtn.mousePressed(randomiseSettings);
@@ -533,12 +541,12 @@ function buildColourUI() {
   refreshUIFromState();
 }
 
-// Keyboard shortcut: press "h" to hide/show
+// Keyboard shortcut: press "h" to hide/show, press "c" to toggle colour drift
 function keyPressed() {
   if (key === 'h' || key === 'H') {
     if (ui.wrap) toggleColourUI();
   }
-  
+
   if (key === 'c' || key === 'C') {
     colourDrift = !colourDrift;
   }
@@ -550,43 +558,44 @@ function keyPressed() {
 
 function setup() {
   frameRate(30);
+  pixelDensity(1);
 
   const myCanvas = createCanvas(windowWidth, windowHeight);
   myCanvas.parent(parentElement);
 
   link = windowWidth / 8;
+  updateThresholds();
 
   loadSettings();
   buildColourUI();
 
   balls = [];
-  for (let i = 0; i < NOB; i++) {
-    balls.push(new Ball());
-  }
+  for (let i = 0; i < NOB; i++) balls.push(new Ball());
 }
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   link = windowWidth / 8;
+  updateThresholds();
 }
 
 function draw() {
   if (colourDrift) {
-    const t = deltaTime / 16.67; // normalise for framerate
-  
+    const t = deltaTime / 16.67; // normalise for frame rate
+
     // Drift curves (more noticeable)
     linkCurveColor[0] = (linkCurveColor[0] + 1.2 * t) % 256;
     linkCurveColor[1] = (linkCurveColor[1] + 0.9 * t) % 256;
     linkCurveColor[2] = (linkCurveColor[2] + 0.6 * t) % 256;
-  
-    // Optional: drift lines too (subtle)
+
+    // Drift lines (subtle)
     linkLineColor[0] = (linkLineColor[0] + 0.25 * t) % 256;
     linkLineColor[1] = (linkLineColor[1] + 0.18 * t) % 256;
     linkLineColor[2] = (linkLineColor[2] + 0.12 * t) % 256;
   }
-  
+
   background(backgroundColor);
-  
+
   // Debug indicator (optional)
   noStroke();
   fill(255);
@@ -637,35 +646,35 @@ function Ball() {
     ellipse(this.xPos, this.yPos, this.d, this.d);
 
     // Ring 1
-    stroke(setAlpha(ballStyle.ring1, ballStyle.ring1Alpha));
+    strokeRGBA(ballStyle.ring1, ballStyle.ring1Alpha);
     noFill();
     ellipse(this.xPos, this.yPos, this.d * ballStyle.ring1Scale, this.d * ballStyle.ring1Scale);
 
     // Ring 2
-    stroke(setAlpha(ballStyle.ring2, ballStyle.ring2Alpha));
+    strokeRGBA(ballStyle.ring2, ballStyle.ring2Alpha);
     ellipse(this.xPos, this.yPos, this.d * ballStyle.ring2Scale, this.d * ballStyle.ring2Scale);
 
-    // Hover glows (circular proximity)
+    // Hover glows (optimised branching)
     const mdx = mouseX - this.xPos;
     const mdy = mouseY - this.yPos;
     const md2 = mdx * mdx + mdy * mdy;
 
-    const glowD = this.d * ballStyle.hoverScale;
-
     if (md2 < 45 * 45) {
-      fill(setAlpha(ballStyle.fill, ballStyle.hoverA1));
+      const glowD = this.d * ballStyle.hoverScale;
       noStroke();
+
+      fillRGBA(ballStyle.fill, ballStyle.hoverA1);
       ellipse(this.xPos, this.yPos, glowD, glowD);
-    }
-    if (md2 < 15 * 15) {
-      fill(setAlpha(ballStyle.fill, ballStyle.hoverA2));
-      noStroke();
-      ellipse(this.xPos, this.yPos, glowD, glowD);
-    }
-    if (md2 < 5 * 5) {
-      fill(setAlpha(ballStyle.fill, ballStyle.hoverA3));
-      noStroke();
-      ellipse(this.xPos, this.yPos, glowD, glowD);
+
+      if (md2 < 15 * 15) {
+        fillRGBA(ballStyle.fill, ballStyle.hoverA2);
+        ellipse(this.xPos, this.yPos, glowD, glowD);
+
+        if (md2 < 5 * 5) {
+          fillRGBA(ballStyle.fill, ballStyle.hoverA3);
+          ellipse(this.xPos, this.yPos, glowD, glowD);
+        }
+      }
     }
   };
 
@@ -681,37 +690,24 @@ function Ball() {
     else if (this.yPos < this.d / 2) this.yPos = height - this.d / 2;
   };
 
-  // Unified connector: computes distance once (squared)
+  // Unified connector: distance once (squared), thresholds cached
   this.connectTo = function (other) {
     const dx = this.xPos - other.xPos;
     const dy = this.yPos - other.yPos;
     const d2 = dx * dx + dy * dy;
 
-    // Straight line further out (link * 1.5)
-    const lineThresh = link * 1.5;
-    const lineThresh2 = lineThresh * lineThresh;
-
-    if (d2 < lineThresh2) {
-      stroke(setAlpha(linkLineColor, 0.05));
+    if (d2 < thr.line2) {
+      strokeRGBA(linkLineColor, 0.05);
       line(this.xPos, this.yPos, other.xPos, other.yPos);
     }
 
-    // Curves nearer in, stepped alpha
-    const nearThresh = link / 2;
-    const midThresh = link / 1.5;
-    const farThresh = link;
-
-    const near2 = nearThresh * nearThresh;
-    const mid2 = midThresh * midThresh;
-    const far2 = farThresh * farThresh;
-
     let curveAlpha = 0;
-    if (d2 < near2) curveAlpha = 0.2;
-    else if (d2 < mid2) curveAlpha = 0.1;
-    else if (d2 < far2) curveAlpha = 0.025;
+    if (d2 < thr.near2) curveAlpha = 0.2;
+    else if (d2 < thr.mid2) curveAlpha = 0.1;
+    else if (d2 < thr.far2) curveAlpha = 0.025;
 
     if (curveAlpha > 0) {
-      stroke(setAlpha(linkCurveColor, curveAlpha));
+      strokeRGBA(linkCurveColor, curveAlpha);
       noFill();
       beginShape();
       vertex(this.xPos, this.yPos);
