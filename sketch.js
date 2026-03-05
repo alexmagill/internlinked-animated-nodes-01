@@ -12,6 +12,8 @@ let backgroundColor = '#201F2C'; // Background colour (redraw each frame)
 let linkLineColor = [249, 220, 92]; // Linear link RGB
 let linkCurveColor = [49, 133, 252]; // Curve link RGB
 
+let colourDrift = false;
+
 // Ball styling
 let ballStyle = {
   // Core ball
@@ -536,6 +538,10 @@ function keyPressed() {
   if (key === 'h' || key === 'H') {
     if (ui.wrap) toggleColourUI();
   }
+  
+  if (key === 'c' || key === 'C') {
+    colourDrift = !colourDrift;
+  }
 }
 
 /* ---------------------------
@@ -565,7 +571,27 @@ function windowResized() {
 }
 
 function draw() {
+  if (colourDrift) {
+    const t = deltaTime / 16.67; // normalise for framerate
+  
+    // Drift curves (more noticeable)
+    linkCurveColor[0] = (linkCurveColor[0] + 1.2 * t) % 256;
+    linkCurveColor[1] = (linkCurveColor[1] + 0.9 * t) % 256;
+    linkCurveColor[2] = (linkCurveColor[2] + 0.6 * t) % 256;
+  
+    // Optional: drift lines too (subtle)
+    linkLineColor[0] = (linkLineColor[0] + 0.25 * t) % 256;
+    linkLineColor[1] = (linkLineColor[1] + 0.18 * t) % 256;
+    linkLineColor[2] = (linkLineColor[2] + 0.12 * t) % 256;
+  }
+  
   background(backgroundColor);
+  
+  // Debug indicator (optional)
+  noStroke();
+  fill(255);
+  textSize(12);
+  text(colourDrift ? 'drift: ON' : 'drift: OFF', 12, height - 12);
 
   // Only draw each pair once
   for (let i = 0; i < NOB; i++) {
